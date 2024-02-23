@@ -82,15 +82,12 @@ def main():
         label_arr = label_arr[: args.num_samples]
     if dist.get_rank() == 0:
         shape_str = "x".join([str(x) for x in arr.shape])
-
-        save_dir = "/kaggle/working/AI-Art/output"
-        os.makedirs(save_dir, exist_ok=True)
-
-        for i, img_array in enumerate(arr):
-            img = Image.fromarray(img_array)
-            img_path = os.path.join(save_dir, f"sample_{i}.png")
-            img.save(img_path)
-        logger.log(f"saved {len(arr)} images to {save_dir}")
+        out_path = os.path.join("/kaggle/working/AI-Art/output/", f"samples_{shape_str}.npz")
+        logger.log(f"saving to {out_path}")
+        if args.class_cond:
+            np.savez(out_path, arr, label_arr)
+        else:
+            np.savez(out_path, arr)
 
     dist.barrier()
     logger.log("sampling complete")
